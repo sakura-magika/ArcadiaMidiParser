@@ -29,6 +29,7 @@ using StringEncoder = System.Text.UTF7Encoding;
 using TrackEventsIEnumerable = System.Collections.Generic.IEnumerable<Midi.Events.MidiEvent>;
 using MidiEventList = System.Collections.Generic.List<Midi.Events.MidiEvent>;
 using NoteOnEventList = System.Collections.Generic.List<Midi.Events.ChannelEvents.NoteOnEvent>;
+using TimeSignatureEventList = System.Collections.Generic.List<Midi.Events.MetaEvents.TimeSignatureEvent>;
 using ByteList = System.Collections.Generic.List<byte>;
 using ByteEnumerable = System.Collections.Generic.IEnumerable<byte>;
 using MidiEvent = Midi.Events.MidiEvent;
@@ -45,15 +46,6 @@ namespace Midi
 {
     public class FileParser
     {
-        public class MidiEventsPack
-        {
-            public readonly MidiEventList midi_events;
-            public readonly NoteOnEventList note_on_events;
-
-            public MidiEventsPack(MidiEventList midi_events, NoteOnEventList note_on_events)
-            { this.midi_events = midi_events; this.note_on_events = note_on_events; }
-        }
-
         private readonly static StringEncoder stringEncoder = new StringEncoder();
 
         public static MidiData Parse(FileStream input_file_stream)
@@ -84,18 +76,23 @@ namespace Midi
 
                     return Tuple.Create(track_chunk_size, track_chunk_data);
                 }).ToList()
-                .Select(raw_track => new TrackChunk(parse_events(raw_track.Item2, raw_track.Item1)));
+                .Select(raw_track => parse_events(raw_track.Item2, raw_track.Item1));
 
             return new MidiData(header_chunk, tracks);
         }
 
-        private static MidiEventsPack parse_events(ByteEnumerable track_data, int chunk_size)
+        private static TrackChunk parse_events(ByteEnumerable track_data, int chunk_size)
         {
             var i = 0;
             var absolute_time = 0;
+            var max_note_number = 0;
+            var min_note_number = 127;
             var last_midi_channel = (byte)0x00;
             var midi_events = new MidiEventList();
             var note_on_events = new NoteOnEventList();
+            var time_signature_events = new TimeSignatureEventList();
+            var track_name_event = new SequenceOrTrackNameEvent("no name");
+            var track_end_event_time = 0;
 
             while (i < chunk_size)
             {
@@ -105,17 +102,52 @@ namespace Midi
 
                 if (tuple.Item1.GetType() == typeof(SomeMidiEvent))
                 {
-                    var midiEvent = (tuple.Item1 as SomeMidiEvent).value;
-                    midi_events.Add(midiEvent);
+                    var midi_event = (tuple.Item1 as SomeMidiEvent).value;
+                    midi_events.Add(midi_event);
 
-                    if (midiEvent.event_type == Events.MidiEventType.NoteOn)
+                    if (midi_event.event_type == Events.MidiEventType.NoteOn)
                     {
-                        note_on_events.Add((NoteOnEvent) midiEvent);
+                        var note_on = (NoteOnEvent) midi_event;
+                        note_on_events.Add(note_on);
+
+                        if (note_on.note_number > max_note_number)
+                        {
+                            max_note_number = note_on.note_number;
+                        }
+
+                        if (note_on.note_number < min_note_number)
+                        {
+                            min_note_number = note_on.note_number;
+                        }
+                    }
+                    else if (midi_event.event_type == Events.MidiEventType.TrackName)
+                    {
+                        track_name_event = (SequenceOrTrackNameEvent)midi_event;
+                    }
+                    else if (midi_event.event_type == Events.MidiEventType.Meta)
+                    {
+                        var meta_event = (MetaEvent)midi_event;
+
+                        if (meta_event.meta_event_type == Events.MidiEventType.TimeSignature)
+                        {
+                            time_signature_events.Add((TimeSignatureEvent)meta_event);
+                        }
+                        else if (meta_event.meta_event_type == Events.MidiEventType.EndOfTrack)
+                        {
+                            track_end_event_time = ((EndOfTrackEvent)meta_event).absolute_time;
+                        }
                     }
                 }
             }
 
-            return new MidiEventsPack(midi_events, note_on_events);
+            var duration = absolute_time;
+
+            if (track_end_event_time != 0)
+            {
+                duration = track_end_event_time;
+            }
+
+            return new TrackChunk(midi_events, note_on_events, time_signature_events, track_name_event.name, min_note_number, max_note_number, duration);
         }
 
         private static MIDIEvent_Length_Tuple next_event(ByteEnumerable track_data, int start_index, byte last_midi_channel, ref int absolute_time, NoteOnEventList note_on_list)

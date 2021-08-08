@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 using TracksIn = System.Collections.Generic.IEnumerable<Midi.Chunks.TrackChunk>;
-using Tracks = System.Collections.Generic.List<Midi.Chunks.TrackChunk>;
+using Tracks = System.Collections.ObjectModel.ReadOnlyCollection<Midi.Chunks.TrackChunk>;
 using HeaderChunk = Midi.Chunks.HeaderChunk;
 using TrackChunk = Midi.Chunks.TrackChunk;
 using System.Linq;
@@ -30,7 +30,7 @@ namespace Midi
     public class MidiData
     {
         public readonly HeaderChunk header;
-        public readonly TracksIn tracks;
+        public readonly Tracks tracks;
 
         public MidiData(HeaderChunk header, TracksIn tracks)
         {

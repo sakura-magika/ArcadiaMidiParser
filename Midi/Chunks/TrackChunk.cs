@@ -21,8 +21,10 @@ THE SOFTWARE.
 */
 using MidiEventList = System.Collections.Generic.List<Midi.Events.MidiEvent>;
 using NoteOnEventList = System.Collections.Generic.List<Midi.Events.ChannelEvents.NoteOnEvent>;
+using TimeSignatureEventList = System.Collections.Generic.List<Midi.Events.MetaEvents.TimeSignatureEvent>;
 using MidiEvents = System.Collections.ObjectModel.ReadOnlyCollection<Midi.Events.MidiEvent>;
 using NoteOnEvents = System.Collections.ObjectModel.ReadOnlyCollection<Midi.Events.ChannelEvents.NoteOnEvent>;
+using TimeSignatureEvents = System.Collections.ObjectModel.ReadOnlyCollection<Midi.Events.MetaEvents.TimeSignatureEvent>;
 using System.Linq;
 using MidiEvent = Midi.Events.MidiEvent;
 
@@ -30,14 +32,40 @@ namespace Midi.Chunks
 {
     public sealed class TrackChunk : Chunk
     {
+        public readonly string name;
         public readonly MidiEvents midi_events;
         public readonly NoteOnEvents note_on_events;
+        public readonly TimeSignatureEvents time_signatures;
+        public readonly int min_note_number;
+        public readonly int max_note_number;
+        public readonly int duration;
 
-        public TrackChunk(Midi.FileParser.MidiEventsPack midi_events_pack)
+        public TrackChunk(MidiEventList midi_events, NoteOnEventList note_on_events, TimeSignatureEventList time_signatures,
+            string track_name, int min_note_number, int max_note_number, int duration)
             : base("MTrk")
         {
-            this.midi_events = midi_events_pack.midi_events.AsReadOnly();
-            this.note_on_events = midi_events_pack.note_on_events.AsReadOnly();
+            this.name = track_name;
+            this.midi_events = midi_events.AsReadOnly();
+            this.note_on_events = note_on_events.AsReadOnly();
+            this.time_signatures = time_signatures.AsReadOnly();
+            this.min_note_number = min_note_number;
+            this.max_note_number = max_note_number;
+            this.duration = duration;
+        }
+
+        public (float beats_per_measure, float beat_unit_length) main_time_signature()
+        {
+            if (time_signatures.Count > 0)
+            {
+                var denominator = (float) time_signatures[0].denominator;
+                var beat_unit_length = (float) System.Math.Pow(2.0f, denominator);
+                var beats_per_measure = time_signatures[0].numerator;
+                return (beats_per_measure, beat_unit_length);
+            }
+            else
+            {
+                return (4, 4);
+            }
         }
 
         override public string ToString()
@@ -45,7 +73,8 @@ namespace Midi.Chunks
             var events_string = midi_events.Aggregate("", (string a, MidiEvent b) => a + b + ", ");
             events_string = events_string.Remove(events_string.Length - 2);
 
-            return "TrackChunk(" + base.ToString() + ", events: [" + events_string + "])";
+            return string.Format("TrackChunk({0}, min_note: {1}, max_note: {2}, time_signature: ({3}) duration: {4}, events: [{5}])",
+                base.ToString(), min_note_number, max_note_number, main_time_signature(), duration, events_string);
         }
     }
 }
