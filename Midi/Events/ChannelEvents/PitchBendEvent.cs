@@ -39,8 +39,8 @@ namespace Midi.Events.ChannelEvents
             }
         }
 
-        public PitchBendEvent(int delta_time, byte midi_channel, byte pitch_value_LSB, byte pitch_value_MSB)
-            : base(delta_time, 0xE0, midi_channel, pitch_value_LSB, pitch_value_MSB)
+        public PitchBendEvent(int absolute_time, int delta_time, byte midi_channel, byte pitch_value_LSB, byte pitch_value_MSB)
+            : base(absolute_time, delta_time, 0xE0, midi_channel, pitch_value_LSB, pitch_value_MSB)
         {
         }
 

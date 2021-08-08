@@ -27,7 +27,7 @@ namespace Midi.Events.MetaEvents
         public readonly string notice;
 
         public CopyrightNoticeEvent(string notice)
-            : base(0, 0x02)
+            : base(0, 0, 0x02)
         {
             this.notice = notice;
         }

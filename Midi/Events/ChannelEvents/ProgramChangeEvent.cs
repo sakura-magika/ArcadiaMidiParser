@@ -32,8 +32,8 @@ namespace Midi.Events.ChannelEvents
             }
         }
 
-        public ProgramChangeEvent(int delta_time, byte midi_channel, byte program_number)
-            : base(delta_time, 0xC0, midi_channel, program_number, 0x00)
+        public ProgramChangeEvent(int absolute_time, int delta_time, byte midi_channel, byte program_number)
+            : base(absolute_time, delta_time, 0xC0, midi_channel, program_number, 0x00)
         {
         }
 

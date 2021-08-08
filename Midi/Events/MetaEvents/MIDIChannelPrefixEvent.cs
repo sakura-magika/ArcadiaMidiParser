@@ -26,8 +26,8 @@ namespace Midi.Events.MetaEvents
     {
         public readonly byte channel;
 
-        public MIDIChannelPrefixEvent(int delta_time, byte channel)
-            : base(delta_time, 0x20)
+        public MIDIChannelPrefixEvent(int absolute_time, int delta_time, byte channel)
+            : base(absolute_time, delta_time, 0x20)
         {
             if (channel < 0 || channel > 15)
             {

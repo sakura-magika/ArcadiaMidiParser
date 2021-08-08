@@ -33,8 +33,8 @@ namespace Midi.Events.MetaEvents
         public readonly byte scale;
         public readonly short key;
 
-        public KeySignatureEvent(int delta_time, byte key, byte scale)
-            : base(delta_time, 0x59)
+        public KeySignatureEvent(int absolute_time, int delta_time, byte key, byte scale)
+            : base(absolute_time, delta_time, 0x59)
         {
 
             /*if (key < -7 || key > 7) {

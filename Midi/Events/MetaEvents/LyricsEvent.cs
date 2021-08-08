@@ -26,8 +26,8 @@ namespace Midi.Events.MetaEvents
     {
         public readonly string text;
 
-        public LyricsEvent(int delta_time, string text)
-            : base(delta_time, 0x05)
+        public LyricsEvent(int absolute_time, int delta_time, string text)
+            : base(absolute_time, delta_time, 0x05)
         {
             this.text = text;
         }

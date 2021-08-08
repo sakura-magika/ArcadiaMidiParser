@@ -28,8 +28,8 @@ namespace Midi.Events.MetaEvents
     {
         public readonly Data data;
 
-        public SequencerSpecificEvent(int delta_time, Data data)
-            : base(delta_time, 0x7F)
+        public SequencerSpecificEvent(int absolute_time, int delta_time, Data data)
+            : base(absolute_time, delta_time, 0x7F)
         {
             this.data = data.ToList().AsReadOnly();
         }

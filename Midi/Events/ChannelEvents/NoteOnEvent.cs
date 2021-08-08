@@ -39,14 +39,28 @@ namespace Midi.Events.ChannelEvents
             }
         }
 
-        public NoteOnEvent(int delta_time, byte midi_channel, byte note_number, byte velocity)
-            : base(delta_time, 0x90, midi_channel, note_number, velocity)
+        public int note_length { get; private set; }
+
+        public NoteOffEvent note_off_event { get; private set; }
+
+        public NoteOnEvent(int absolute_time, int delta_time, byte midi_channel, byte note_number, byte velocity)
+            : base(absolute_time, delta_time, 0x90, midi_channel, note_number, velocity)
         {
+        }
+
+        public void update_length(int length)
+        {
+            note_length = length;
+        }
+
+        public void pair_note_off(NoteOffEvent note_off_event)
+        {
+            this.note_off_event = note_off_event;
         }
 
         public override string ToString()
         {
-            return "NoteOnEvent(" + base.ToString() + ", note_number: " + note_number + ", velocity: " + velocity + ")";
+            return "NoteOnEvent(" + base.ToString() + ", note_number: " + note_number + ", velocity: " + velocity + ", note_length: " + note_length + ")";
         }
     }
 }

@@ -26,8 +26,8 @@ namespace Midi.Events.MetaEvents
     {
         public readonly int tempo;
 
-        public SetTempoEvent(int delta_time, int tempo)
-            : base(delta_time, 0x51)
+        public SetTempoEvent(int absolute_time, int delta_time, int tempo)
+            : base(absolute_time, delta_time, 0x51)
         {
             if (tempo < 0 || tempo > 0x7F7F7F)
             {

@@ -19,8 +19,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-using TrackEventsIEnumerable = System.Collections.Generic.IEnumerable<Midi.Events.MidiEvent>;
-using TrackEvents = System.Collections.ObjectModel.ReadOnlyCollection<Midi.Events.MidiEvent>;
+using MidiEventList = System.Collections.Generic.List<Midi.Events.MidiEvent>;
+using NoteOnEventList = System.Collections.Generic.List<Midi.Events.ChannelEvents.NoteOnEvent>;
+using MidiEvents = System.Collections.ObjectModel.ReadOnlyCollection<Midi.Events.MidiEvent>;
+using NoteOnEvents = System.Collections.ObjectModel.ReadOnlyCollection<Midi.Events.ChannelEvents.NoteOnEvent>;
 using System.Linq;
 using MidiEvent = Midi.Events.MidiEvent;
 
@@ -28,33 +30,19 @@ namespace Midi.Chunks
 {
     public sealed class TrackChunk : Chunk
     {
-        // Lazy loading mechanism
-        private TrackEventsIEnumerable _events;
+        public readonly MidiEvents midi_events;
+        public readonly NoteOnEvents note_on_events;
 
-        public TrackEventsIEnumerable events
-        {
-            get
-            {
-                switch (_events.GetType() == typeof(TrackEvents))
-                {
-                    case false:
-                        _events = _events.ToList().AsReadOnly();
-                        break;
-                }
-                return _events;
-            }
-            private set { }
-        }
-
-        public TrackChunk(TrackEventsIEnumerable events)
+        public TrackChunk(Midi.FileParser.MidiEventsPack midi_events_pack)
             : base("MTrk")
         {
-            this._events = events;
+            this.midi_events = midi_events_pack.midi_events.AsReadOnly();
+            this.note_on_events = midi_events_pack.note_on_events.AsReadOnly();
         }
 
         override public string ToString()
         {
-            var events_string = events.Aggregate("", (string a, MidiEvent b) => a + b + ", ");
+            var events_string = midi_events.Aggregate("", (string a, MidiEvent b) => a + b + ", ");
             events_string = events_string.Remove(events_string.Length - 2);
 
             return "TrackChunk(" + base.ToString() + ", events: [" + events_string + "])";

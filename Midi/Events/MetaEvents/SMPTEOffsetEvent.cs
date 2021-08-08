@@ -30,8 +30,8 @@ namespace Midi.Events.MetaEvents
         public readonly int frames;
         public readonly int subframes;
 
-        public SMPTEOffsetEvent(int delta_time, int hours, int minutes, int seconds, int frames, int subframes)
-            : base(delta_time, 0x54)
+        public SMPTEOffsetEvent(int absolute_time, int delta_time, int hours, int minutes, int seconds, int frames, int subframes)
+            : base(absolute_time, delta_time, 0x54)
         {
             this.hours = hours;
             this.minutes = minutes;

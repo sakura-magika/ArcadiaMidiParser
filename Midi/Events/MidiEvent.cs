@@ -22,20 +22,58 @@ THE SOFTWARE.
 
 namespace Midi.Events
 {
-    public abstract class MidiEvent
-    {
-        public readonly int delta_time;
-        public readonly byte event_type;
+	public enum MidiEventType
+	{
 
-        public MidiEvent(int delta_time, byte event_type)
+		// control events
+		NoteOff = 0x80,
+		NoteOn = 0x90,
+		KeyAfter = 0xA0,
+		ControlChange = 0xB0,
+		ProgramChange = 0xC0,
+		ChannelAfter = 0xD0,
+		PitchChange = 0xE0,
+		Meta = 0xFF,
+		System = 0xF0,
+
+		// midi events
+		SetTrackSequence = 0x00,
+		TextEvent = 0x01,
+		Copyright = 0x02,
+		TrackName = 0x03,
+		InstrumentName = 0x04,
+		Lyric = 0x05,
+		Marker = 0x06,
+		Cue = 0x07,
+		EndOfTrack = 0x2f,
+		SetTempo = 0x51,
+		TimeSignature = 0x58,
+		KeySignature = 0x59,
+		SequencerSpecific = 0x7F,
+		TimingClock = 0xF8,
+		StartSequence = 0xFA,
+		ContinueSequence = 0xFB,
+		StopSequence = 0xFC,
+
+		Unknown = 0xDD
+	};
+
+	public abstract class MidiEvent
+    {
+		public readonly int absolute_time;
+        public readonly int delta_time;
+        public readonly MidiEventType event_type;
+
+        public MidiEvent(int absolute_time, int delta_time, byte event_type)
         {
+			this.absolute_time = absolute_time;
             this.delta_time = delta_time;
-            this.event_type = event_type;
+            this.event_type = (MidiEventType) event_type;
         }
 
         public override string ToString()
         {
-            return "MidiEvent(delta_time: " + delta_time + ", event_type: " + event_type + ")";
+            return "MidiEvent(absolute_time: " + absolute_time + " delta_time: " + delta_time + ", event_type: " + event_type + ")";
         }
     }
 }

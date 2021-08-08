@@ -24,8 +24,8 @@ namespace Midi.Events.MetaEvents
 {
     public sealed class EndOfTrackEvent : MetaEvent
     {
-        public EndOfTrackEvent(int delta_time)
-            : base(delta_time, 0x2F)
+        public EndOfTrackEvent(int absolute_time, int delta_time)
+            : base(absolute_time, delta_time, 0x2F)
         {
         }
 

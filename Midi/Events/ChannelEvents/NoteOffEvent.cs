@@ -39,8 +39,8 @@ namespace Midi.Events.ChannelEvents
             }
         }
 
-        public NoteOffEvent(int delta_time, byte midi_channel, byte note_number, byte velocity)
-            : base(delta_time, 0x80, midi_channel, note_number, velocity)
+        public NoteOffEvent(int absolute_time, int delta_time, byte midi_channel, byte note_number, byte velocity)
+            : base(absolute_time, delta_time, 0x80, midi_channel, note_number, velocity)
         {
         }
 

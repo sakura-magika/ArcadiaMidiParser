@@ -28,8 +28,8 @@ namespace Midi.Events.ChannelEvents
         public readonly byte parameter_1;
         public readonly byte parameter_2;
 
-        public ChannelEvent(int delta_time, byte event_type, byte midi_channel, byte parameter_1, byte parameter_2)
-            : base(delta_time, event_type)
+        public ChannelEvent(int absolute_time, int delta_time, byte event_type, byte midi_channel, byte parameter_1, byte parameter_2)
+            : base(absolute_time, delta_time, event_type)
         {
             this.midi_channel = midi_channel;
             this.parameter_1 = parameter_1;

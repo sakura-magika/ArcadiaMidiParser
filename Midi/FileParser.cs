@@ -27,6 +27,8 @@ using HeaderChunk = Midi.Chunks.HeaderChunk;
 using TrackChunk = Midi.Chunks.TrackChunk;
 using StringEncoder = System.Text.UTF7Encoding;
 using TrackEventsIEnumerable = System.Collections.Generic.IEnumerable<Midi.Events.MidiEvent>;
+using MidiEventList = System.Collections.Generic.List<Midi.Events.MidiEvent>;
+using NoteOnEventList = System.Collections.Generic.List<Midi.Events.ChannelEvents.NoteOnEvent>;
 using ByteList = System.Collections.Generic.List<byte>;
 using ByteEnumerable = System.Collections.Generic.IEnumerable<byte>;
 using MidiEvent = Midi.Events.MidiEvent;
@@ -43,9 +45,18 @@ namespace Midi
 {
     public class FileParser
     {
+        public class MidiEventsPack
+        {
+            public readonly MidiEventList midi_events;
+            public readonly NoteOnEventList note_on_events;
+
+            public MidiEventsPack(MidiEventList midi_events, NoteOnEventList note_on_events)
+            { this.midi_events = midi_events; this.note_on_events = note_on_events; }
+        }
+
         private readonly static StringEncoder stringEncoder = new StringEncoder();
 
-        public static MidiData parse(FileStream input_file_stream)
+        public static MidiData Parse(FileStream input_file_stream)
         {
             var input_binary_reader = new BinaryReader(input_file_stream);
 
@@ -78,29 +89,36 @@ namespace Midi
             return new MidiData(header_chunk, tracks);
         }
 
-        private static TrackEventsIEnumerable parse_events(ByteEnumerable track_data, int chunk_size)
+        private static MidiEventsPack parse_events(ByteEnumerable track_data, int chunk_size)
         {
             var i = 0;
+            var absolute_time = 0;
             var last_midi_channel = (byte)0x00;
+            var midi_events = new MidiEventList();
+            var note_on_events = new NoteOnEventList();
 
             while (i < chunk_size)
             {
-                var tuple = next_event(track_data, i, last_midi_channel);
+                var tuple = next_event(track_data, i, last_midi_channel, ref absolute_time, note_on_events);
                 i += tuple.Item2;
                 last_midi_channel = tuple.Item3;
 
-                switch (tuple.Item1.GetType() == typeof(SomeMidiEvent))
+                if (tuple.Item1.GetType() == typeof(SomeMidiEvent))
                 {
-                    case true:
-                        yield return (tuple.Item1 as SomeMidiEvent).value;
-                        break;
+                    var midiEvent = (tuple.Item1 as SomeMidiEvent).value;
+                    midi_events.Add(midiEvent);
+
+                    if (midiEvent.event_type == Events.MidiEventType.NoteOn)
+                    {
+                        note_on_events.Add((NoteOnEvent) midiEvent);
+                    }
                 }
             }
 
-            yield break;
+            return new MidiEventsPack(midi_events, note_on_events);
         }
 
-        private static MIDIEvent_Length_Tuple next_event(ByteEnumerable track_data, int start_index, byte last_midi_channel)
+        private static MIDIEvent_Length_Tuple next_event(ByteEnumerable track_data, int start_index, byte last_midi_channel, ref int absolute_time, NoteOnEventList note_on_list)
         {
             var i = start_index - 1;
 
@@ -118,6 +136,7 @@ namespace Midi
                     delta_time = VariableLengthUtil.decode_to_int(length_temp);
                 }
 
+                absolute_time += delta_time;
                 i += 1;
 
                 var event_type_value = track_data.ElementAt(i);
@@ -137,11 +156,11 @@ namespace Midi
                     {
                         // One parameter types
                         case 0xC0:
-                            midi_event = new ProgramChangeEvent(delta_time, midi_channel, parameter_1);
+                            midi_event = new ProgramChangeEvent(absolute_time, delta_time, midi_channel, parameter_1);
                             last_midi_channel = midi_channel;
                             break;
                         case 0xD0:
-                            midi_event = new ChannelAftertouchEvent(delta_time, midi_channel, parameter_1);
+                            midi_event = new ChannelAftertouchEvent(absolute_time, delta_time, midi_channel, parameter_1);
                             last_midi_channel = midi_channel;
                             break;
 
@@ -149,36 +168,38 @@ namespace Midi
                         case 0x80:
                             i += 1;
                             parameter_2 = track_data.ElementAt(i);
-                            midi_event = new NoteOffEvent(delta_time, midi_channel, parameter_1, parameter_2);
+                            midi_event = new NoteOffEvent(absolute_time, delta_time, midi_channel, parameter_1, parameter_2);
                             last_midi_channel = midi_channel;
+                            pair_note_off_event((NoteOffEvent) midi_event, note_on_list);
                             break;
                         case 0x90:
                             i += 1;
                             parameter_2 = track_data.ElementAt(i);
-                            midi_event = new NoteOnEvent(delta_time, midi_channel, parameter_1, parameter_2);
+                            midi_event = new NoteOnEvent(absolute_time, delta_time, midi_channel, parameter_1, parameter_2);
                             last_midi_channel = midi_channel;
+                            validate_note_on_event((NoteOnEvent) midi_event, note_on_list);
                             break;
                         case 0xA0:
                             i += 1;
                             parameter_2 = track_data.ElementAt(i);
-                            midi_event = new NoteAftertouchEvent(delta_time, midi_channel, parameter_1, parameter_2);
+                            midi_event = new NoteAftertouchEvent(absolute_time, delta_time, midi_channel, parameter_1, parameter_2);
                             last_midi_channel = midi_channel;
                             break;
                         case 0xB0:
                             i += 1;
                             parameter_2 = track_data.ElementAt(i);
-                            midi_event = new ControllerEvent(delta_time, midi_channel, parameter_1, parameter_2);
+                            midi_event = new ControllerEvent(absolute_time, delta_time, midi_channel, parameter_1, parameter_2);
                             last_midi_channel = midi_channel;
                             break;
                         case 0xE0:
                             i += 1;
                             parameter_2 = track_data.ElementAt(i);
-                            midi_event = new PitchBendEvent(delta_time, midi_channel, parameter_1, parameter_2);
+                            midi_event = new PitchBendEvent(absolute_time, delta_time, midi_channel, parameter_1, parameter_2);
                             last_midi_channel = midi_channel;
                             break;
                         // Might be a Control Change Messages LSB
                         default:
-                            midi_event = new ControllerEvent(delta_time, last_midi_channel, event_type_value, parameter_1);
+                            midi_event = new ControllerEvent(absolute_time, delta_time, last_midi_channel, event_type_value, parameter_1);
                             break;
                     }
 
@@ -200,7 +221,7 @@ namespace Midi
                             midi_event = new SequenceNumberEvent(BitConverter.ToUInt16(meta_event_data.Reverse().ToArray<byte>(), 0));
                             break;
                         case 0x01:
-                            midi_event = new TextEvent(delta_time, stringEncoder.GetString(meta_event_data));
+                            midi_event = new TextEvent(absolute_time, delta_time, stringEncoder.GetString(meta_event_data));
                             break;
                         case 0x02:
                             midi_event = new CopyrightNoticeEvent(stringEncoder.GetString(meta_event_data));
@@ -209,22 +230,22 @@ namespace Midi
                             midi_event = new SequenceOrTrackNameEvent(stringEncoder.GetString(meta_event_data));
                             break;
                         case 0x04:
-                            midi_event = new InstrumentNameEvent(delta_time, stringEncoder.GetString(meta_event_data));
+                            midi_event = new InstrumentNameEvent(absolute_time, delta_time, stringEncoder.GetString(meta_event_data));
                             break;
                         case 0x05:
-                            midi_event = new LyricsEvent(delta_time, stringEncoder.GetString(meta_event_data));
+                            midi_event = new LyricsEvent(absolute_time, delta_time, stringEncoder.GetString(meta_event_data));
                             break;
                         case 0x06:
-                            midi_event = new MarkerEvent(delta_time, stringEncoder.GetString(meta_event_data));
+                            midi_event = new MarkerEvent(absolute_time, delta_time, stringEncoder.GetString(meta_event_data));
                             break;
                         case 0x07:
-                            midi_event = new CuePointEvent(delta_time, stringEncoder.GetString(meta_event_data));
+                            midi_event = new CuePointEvent(absolute_time, delta_time, stringEncoder.GetString(meta_event_data));
                             break;
                         case 0x20:
-                            midi_event = new MIDIChannelPrefixEvent(delta_time, meta_event_data[0]);
+                            midi_event = new MIDIChannelPrefixEvent(absolute_time, delta_time, meta_event_data[0]);
                             break;
                         case 0x2F:
-                            midi_event = new EndOfTrackEvent(delta_time);
+                            midi_event = new EndOfTrackEvent(absolute_time, delta_time);
                             break;
                         case 0x51:
                             var tempo =
@@ -234,19 +255,19 @@ namespace Midi
                                 ((meta_event_data[1] & 0xF0) * 4096) +
                                 ((meta_event_data[0] & 0x0F) * 65536) +
                                 ((meta_event_data[0] & 0xF0) * 1048576);
-                            midi_event = new SetTempoEvent(delta_time, tempo);
+                            midi_event = new SetTempoEvent(absolute_time, delta_time, tempo);
                             break;
                         case 0x54:
-                            midi_event = new SMPTEOffsetEvent(delta_time, meta_event_data[0], meta_event_data[1], meta_event_data[2], meta_event_data[3], meta_event_data[4]);
+                            midi_event = new SMPTEOffsetEvent(absolute_time, delta_time, meta_event_data[0], meta_event_data[1], meta_event_data[2], meta_event_data[3], meta_event_data[4]);
                             break;
                         case 0x58:
-                            midi_event = new TimeSignatureEvent(delta_time, meta_event_data[0], meta_event_data[1], meta_event_data[2], meta_event_data[3]);
+                            midi_event = new TimeSignatureEvent(absolute_time, delta_time, meta_event_data[0], meta_event_data[1], meta_event_data[2], meta_event_data[3]);
                             break;
                         case 0x59:
-                            midi_event = new KeySignatureEvent(delta_time, meta_event_data[0], meta_event_data[1]);
+                            midi_event = new KeySignatureEvent(absolute_time, delta_time, meta_event_data[0], meta_event_data[1]);
                             break;
                         case 0x7F:
-                            midi_event = new SequencerSpecificEvent(delta_time, meta_event_data);
+                            midi_event = new SequencerSpecificEvent(absolute_time, delta_time, meta_event_data);
                             break;
                     }
 
@@ -272,7 +293,7 @@ namespace Midi
 
                     var event_data = Enumerable.Range(i, event_length).Select(b => track_data.ElementAt(b));
 
-                    midi_event = new SysexEvent(delta_time, event_type_value, event_data);
+                    midi_event = new SysexEvent(absolute_time, delta_time, event_type_value, event_data);
 
                     i += event_length;
                 }
@@ -285,6 +306,54 @@ namespace Midi
             }
 
             return new MIDIEvent_Length_Tuple(new NoMidiEvent(), i - start_index, last_midi_channel);
+        }
+
+        private static void pair_note_off_event(NoteOffEvent off_event, NoteOnEventList on_events)
+        {
+            var found_match = false;
+
+            for (int i = (on_events.Count - 1); i >= 0; i--)
+            {
+                var on_event = on_events[i];
+
+                if (on_event.note_number == off_event.note_number)
+                {
+                    if (on_event.note_off_event != null)
+                    {
+                        UnityEngine.Debug.LogErrorFormat("Found already-paired NoteOn event: {0} for NoteOff: {1}", on_event.ToString(), off_event.ToString());
+                    }
+
+                    var length = off_event.absolute_time - on_event.absolute_time;
+                    on_event.update_length(length);
+                    on_event.pair_note_off(off_event);
+                    found_match = true;
+
+                    break;
+                }
+            }
+
+            if (found_match == false)
+            {
+                UnityEngine.Debug.LogErrorFormat("Failed to find NoteOn event for NoteOff: {0}", off_event.ToString());
+            }
+        }
+
+        private static void validate_note_on_event(NoteOnEvent on_event, NoteOnEventList on_events)
+        {
+            for (int i = (on_events.Count - 1); i >= 0; i--)
+            {
+                var previous_on_event = on_events[i];
+
+                if (on_event.note_number == previous_on_event.note_number)
+                {
+                    if (previous_on_event.note_off_event == null)
+                    {
+                        UnityEngine.Debug.LogErrorFormat("Found new NoteOn event: {0} for when previous NoteOn is unpaired: {1}", on_event.ToString(), previous_on_event.ToString());
+                    }
+
+                    break;
+                }
+            }
         }
     }
 }

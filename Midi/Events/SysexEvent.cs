@@ -28,8 +28,8 @@ namespace Midi.Events
     {
         public readonly Data data;
 
-        public SysexEvent(int delta_time, byte event_type, Data data)
-            : base(delta_time, event_type)
+        public SysexEvent(int absolute_time, int delta_time, byte event_type, Data data)
+            : base(absolute_time, delta_time, event_type)
         {
             switch (event_type == 0xF0 || event_type == 0xF7)
             {

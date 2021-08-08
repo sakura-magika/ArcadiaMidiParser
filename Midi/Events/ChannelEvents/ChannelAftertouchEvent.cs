@@ -32,8 +32,8 @@ namespace Midi.Events.ChannelEvents
             }
         }
 
-        public ChannelAftertouchEvent(int delta_time, byte midi_channel, byte aftertouch_value)
-            : base(delta_time, 0xD0, midi_channel, aftertouch_value, 0x00) { }
+        public ChannelAftertouchEvent(int absolute_time, int delta_time, byte midi_channel, byte aftertouch_value)
+            : base(absolute_time, delta_time, 0xD0, midi_channel, aftertouch_value, 0x00) { }
 
         public override string ToString()
         {

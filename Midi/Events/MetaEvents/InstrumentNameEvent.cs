@@ -26,8 +26,8 @@ namespace Midi.Events.MetaEvents
     {
         public readonly string name;
 
-        public InstrumentNameEvent(int delta_time, string name)
-            : base(delta_time, 0x04)
+        public InstrumentNameEvent(int absolute_time, int delta_time, string name)
+            : base(absolute_time, delta_time, 0x04)
         {
             this.name = name;
         }

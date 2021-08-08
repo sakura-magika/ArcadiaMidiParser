@@ -39,8 +39,8 @@ namespace Midi.Events.ChannelEvents
             }
         }
 
-        public ControllerEvent(int delta_time, byte midi_channel, byte controller_number, byte controller_value)
-            : base(delta_time, 0xB0, midi_channel, controller_number, controller_value)
+        public ControllerEvent(int absolute_time, int delta_time, byte midi_channel, byte controller_number, byte controller_value)
+            : base(absolute_time, delta_time, 0xB0, midi_channel, controller_number, controller_value)
         {
         }
 

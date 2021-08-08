@@ -29,8 +29,8 @@ namespace Midi.Events.MetaEvents
         public readonly byte metronome_pulse;
         public readonly byte number_of_32nd_notes_per_MIDI_quarter_note;
 
-        public TimeSignatureEvent(int delta_time, byte numerator, byte denominator, byte metronome_pulse, byte number_of_32nd_notes_per_MIDI_quarter_note)
-            : base(delta_time, 0x58)
+        public TimeSignatureEvent(int absolute_time, int delta_time, byte numerator, byte denominator, byte metronome_pulse, byte number_of_32nd_notes_per_MIDI_quarter_note)
+            : base(absolute_time, delta_time, 0x58)
         {
             this.numerator = numerator;
             this.denominator = denominator;

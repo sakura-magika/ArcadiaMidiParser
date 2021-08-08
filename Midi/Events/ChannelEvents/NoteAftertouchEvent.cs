@@ -39,8 +39,8 @@ namespace Midi.Events.ChannelEvents
             }
         }
 
-        public NoteAftertouchEvent(int delta_time, byte midi_channel, byte note_number, byte aftertouch_value)
-            : base(delta_time, 0xA0, midi_channel, note_number, aftertouch_value)
+        public NoteAftertouchEvent(int absolute_time, int delta_time, byte midi_channel, byte note_number, byte aftertouch_value)
+            : base(absolute_time, delta_time, 0xA0, midi_channel, note_number, aftertouch_value)
         {
         }
 

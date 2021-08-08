@@ -26,8 +26,8 @@ namespace Midi.Events.MetaEvents
     {
         public readonly string text;
 
-        public CuePointEvent(int delta_time, string text)
-            : base(delta_time, 0x07)
+        public CuePointEvent(int absolute_time, int delta_time, string text)
+            : base(absolute_time, delta_time, 0x07)
         {
             this.text = text;
         }

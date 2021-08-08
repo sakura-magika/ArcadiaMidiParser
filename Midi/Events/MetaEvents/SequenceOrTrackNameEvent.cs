@@ -27,7 +27,7 @@ namespace Midi.Events.MetaEvents
         public readonly string name;
 
         public SequenceOrTrackNameEvent(string name)
-            : base(0, 0x03)
+            : base(0, 0, 0x03)
         {
             this.name = name;
         }
