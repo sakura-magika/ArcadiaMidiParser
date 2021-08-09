@@ -120,10 +120,6 @@ namespace Midi
                             min_note_number = note_on.note_number;
                         }
                     }
-                    else if (midi_event.event_type == Events.MidiEventType.TrackName)
-                    {
-                        track_name_event = (SequenceOrTrackNameEvent)midi_event;
-                    }
                     else if (midi_event.event_type == Events.MidiEventType.Meta)
                     {
                         var meta_event = (MetaEvent)midi_event;
@@ -136,12 +132,19 @@ namespace Midi
                         {
                             track_end_event_time = ((EndOfTrackEvent)meta_event).absolute_time;
                         }
+                        else if (meta_event.meta_event_type == Events.MidiEventType.TrackName)
+                        {
+                            track_name_event = (SequenceOrTrackNameEvent)midi_event;
+                        }
                     }
                 }
             }
 
             var duration = absolute_time;
 
+            // TODO: this seems to be cutting the file off at the last note's end, instead of the actual end, which is a problem:
+            // if playing multiple files simultaneously, their ends may not be synchronized.
+            // if I re-import the midi back into ableton, it is the correct length, not cut off, so there must be a way to fix this.
             if (track_end_event_time != 0)
             {
                 duration = track_end_event_time;
