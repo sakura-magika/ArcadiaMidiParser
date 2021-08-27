@@ -29,7 +29,7 @@ namespace Midi.Events.MetaEvents
         public SequenceOrTrackNameEvent(string name)
             : base(0, 0, 0x03)
         {
-            this.name = name;
+            this.name = name.Replace("\0", string.Empty).Trim();
         }
 
         public override string ToString()

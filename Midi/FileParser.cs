@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 using System.Linq;
-using FileStream = System.IO.FileStream;
+using Stream = System.IO.Stream;
 using BinaryReader = System.IO.BinaryReader;
 using BitConverter = System.BitConverter;
 using HeaderChunk = Midi.Chunks.HeaderChunk;
@@ -48,7 +48,7 @@ namespace Midi
     {
         private readonly static StringEncoder stringEncoder = new StringEncoder();
 
-        public static MidiData Parse(FileStream input_file_stream)
+        public static MidiData Parse(Stream input_file_stream)
         {
             var input_binary_reader = new BinaryReader(input_file_stream);
 
