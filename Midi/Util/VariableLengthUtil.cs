@@ -26,7 +26,7 @@ using BoolList = System.Collections.Generic.List<bool>;
 using BoolEnumerable = System.Collections.Generic.IEnumerable<bool>;
 using System;
 
-namespace Midi.Util
+namespace Arcadia.Midi.Util
 {
     public sealed class VariableLengthUtil
     {

@@ -22,7 +22,7 @@ THE SOFTWARE.
 using Data = System.Collections.Generic.IEnumerable<byte>;
 using System.Linq;
 
-namespace Midi.Events.MetaEvents
+namespace Arcadia.Midi.Events.MetaEvents
 {
     public sealed class SequencerSpecificEvent : MetaEvent
     {

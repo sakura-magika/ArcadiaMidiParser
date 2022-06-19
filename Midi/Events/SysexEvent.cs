@@ -22,7 +22,7 @@ THE SOFTWARE.
 using Data = System.Collections.Generic.IEnumerable<byte>;
 using System.Linq;
 
-namespace Midi.Events
+namespace Arcadia.Midi.Events
 {
     public class SysexEvent : MidiEvent
     {

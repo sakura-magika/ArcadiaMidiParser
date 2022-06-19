@@ -19,13 +19,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-using TracksIn = System.Collections.Generic.IEnumerable<Midi.Chunks.TrackChunk>;
-using Tracks = System.Collections.ObjectModel.ReadOnlyCollection<Midi.Chunks.TrackChunk>;
-using HeaderChunk = Midi.Chunks.HeaderChunk;
-using TrackChunk = Midi.Chunks.TrackChunk;
+using TracksIn = System.Collections.Generic.IEnumerable<Arcadia.Midi.Chunks.TrackChunk>;
+using Tracks = System.Collections.ObjectModel.ReadOnlyCollection<Arcadia.Midi.Chunks.TrackChunk>;
+using HeaderChunk = Arcadia.Midi.Chunks.HeaderChunk;
+using TrackChunk = Arcadia.Midi.Chunks.TrackChunk;
 using System.Linq;
 
-namespace Midi
+namespace Arcadia.Midi
 {
     public class MidiData
     {

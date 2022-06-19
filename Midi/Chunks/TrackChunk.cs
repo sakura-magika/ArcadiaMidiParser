@@ -19,16 +19,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-using MidiEventList = System.Collections.Generic.List<Midi.Events.MidiEvent>;
-using NoteOnEventList = System.Collections.Generic.List<Midi.Events.ChannelEvents.NoteOnEvent>;
-using TimeSignatureEventList = System.Collections.Generic.List<Midi.Events.MetaEvents.TimeSignatureEvent>;
-using MidiEvents = System.Collections.ObjectModel.ReadOnlyCollection<Midi.Events.MidiEvent>;
-using NoteOnEvents = System.Collections.ObjectModel.ReadOnlyCollection<Midi.Events.ChannelEvents.NoteOnEvent>;
-using TimeSignatureEvents = System.Collections.ObjectModel.ReadOnlyCollection<Midi.Events.MetaEvents.TimeSignatureEvent>;
+using MidiEventList = System.Collections.Generic.List<Arcadia.Midi.Events.MidiEvent>;
+using NoteOnEventList = System.Collections.Generic.List<Arcadia.Midi.Events.ChannelEvents.NoteOnEvent>;
+using TimeSignatureEventList = System.Collections.Generic.List<Arcadia.Midi.Events.MetaEvents.TimeSignatureEvent>;
+using MidiEvents = System.Collections.ObjectModel.ReadOnlyCollection<Arcadia.Midi.Events.MidiEvent>;
+using NoteOnEvents = System.Collections.ObjectModel.ReadOnlyCollection<Arcadia.Midi.Events.ChannelEvents.NoteOnEvent>;
+using TimeSignatureEvents = System.Collections.ObjectModel.ReadOnlyCollection<Arcadia.Midi.Events.MetaEvents.TimeSignatureEvent>;
 using System.Linq;
-using MidiEvent = Midi.Events.MidiEvent;
+using MidiEvent = Arcadia.Midi.Events.MidiEvent;
 
-namespace Midi.Chunks
+namespace Arcadia.Midi.Chunks
 {
     public sealed class TrackChunk : Chunk
     {

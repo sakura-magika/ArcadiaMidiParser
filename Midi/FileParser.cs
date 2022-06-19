@@ -23,26 +23,26 @@ using System.Linq;
 using Stream = System.IO.Stream;
 using BinaryReader = System.IO.BinaryReader;
 using BitConverter = System.BitConverter;
-using HeaderChunk = Midi.Chunks.HeaderChunk;
-using TrackChunk = Midi.Chunks.TrackChunk;
+using HeaderChunk = Arcadia.Midi.Chunks.HeaderChunk;
+using TrackChunk = Arcadia.Midi.Chunks.TrackChunk;
 using StringEncoder = System.Text.UTF7Encoding;
-using TrackEventsIEnumerable = System.Collections.Generic.IEnumerable<Midi.Events.MidiEvent>;
-using MidiEventList = System.Collections.Generic.List<Midi.Events.MidiEvent>;
-using NoteOnEventList = System.Collections.Generic.List<Midi.Events.ChannelEvents.NoteOnEvent>;
-using TimeSignatureEventList = System.Collections.Generic.List<Midi.Events.MetaEvents.TimeSignatureEvent>;
+using TrackEventsIEnumerable = System.Collections.Generic.IEnumerable<Arcadia.Midi.Events.MidiEvent>;
+using MidiEventList = System.Collections.Generic.List<Arcadia.Midi.Events.MidiEvent>;
+using NoteOnEventList = System.Collections.Generic.List<Arcadia.Midi.Events.ChannelEvents.NoteOnEvent>;
+using TimeSignatureEventList = System.Collections.Generic.List<Arcadia.Midi.Events.MetaEvents.TimeSignatureEvent>;
 using ByteList = System.Collections.Generic.List<byte>;
 using ByteEnumerable = System.Collections.Generic.IEnumerable<byte>;
-using MidiEvent = Midi.Events.MidiEvent;
-using MIDIEvent_Length_Tuple = System.Tuple<Midi.Util.Option.Option<Midi.Events.MidiEvent>, int, byte>;
-using SomeMidiEvent = Midi.Util.Option.Some<Midi.Events.MidiEvent>;
-using NoMidiEvent = Midi.Util.Option.None<Midi.Events.MidiEvent>;
-using VariableLengthUtil = Midi.Util.VariableLengthUtil;
-using Midi.Events.MetaEvents;
-using SysexEvent = Midi.Events.SysexEvent;
-using Midi.Events.ChannelEvents;
+using MidiEvent = Arcadia.Midi.Events.MidiEvent;
+using MIDIEvent_Length_Tuple = System.Tuple<Arcadia.Midi.Util.Option.Option<Arcadia.Midi.Events.MidiEvent>, int, byte>;
+using SomeMidiEvent = Arcadia.Midi.Util.Option.Some<Arcadia.Midi.Events.MidiEvent>;
+using NoMidiEvent = Arcadia.Midi.Util.Option.None<Arcadia.Midi.Events.MidiEvent>;
+using VariableLengthUtil = Arcadia.Midi.Util.VariableLengthUtil;
+using Arcadia.Midi.Events.MetaEvents;
+using SysexEvent = Arcadia.Midi.Events.SysexEvent;
+using Arcadia.Midi.Events.ChannelEvents;
 using System;
 
-namespace Midi
+namespace Arcadia.Midi
 {
     public class FileParser
     {

@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-namespace Midi.Events.ChannelEvents
+namespace Arcadia.Midi.Events.ChannelEvents
 {
     public sealed class NoteOnEvent : ChannelEvent
     {
